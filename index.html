@@ -260,10 +260,33 @@
         </div>
         <div class="dialog-footer"><button type="button" id="close-solve">Close</button></div>
     </dialog>
-<div class="popup" if="popup">
-    <button onClick="alert('Keyboard Shortcuts: Ctrl+2=+2(Penalty) \nctrl+3=DNF')">Keyboard Shortcuts</button>
-    </div>
+
+<div class="popup">
+    <button type="button" onclick="document.getElementById('shortcutsPopup').showModal()">
+        Keyboard Shortcuts
+    </button>
 </div>
+
+<dialog id="shortcutsPopup" class="solve-dialog">
+    <h2>Keyboard Shortcuts</h2>
+
+    <p>Space = Start / Stop Timer</p>
+    <p>I = 15-second Inspection</p>
+    <p>N = New Scramble</p>
+    <p>P = Choose Puzzle</p>
+    <p>S = Manage Sessions</p>
+    <p>G = Show Graph</p>
+    <p>E = Export CSV</p>
+    <p>T = Change Theme</p>
+    <p>Ctrl+Z = Delete Last Solve</p>
+    <p>Ctrl+2 = +2 Penalty</p>
+    <p>Ctrl+3 = DNF</p>
+
+    <button type="button" onclick="document.getElementById('shortcutsPopup').close()">
+        Close
+    </button>
+</dialog>
+
     <script>
     (() => {
         const STORAGE_KEY = "cubingD_data_v1";
