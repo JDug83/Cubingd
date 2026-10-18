@@ -216,6 +216,48 @@
         }
         .dialog-footer { display: flex; justify-content: flex-end; }
         .popup { position: fixed; bottom: 20px; right: 20px; background: var(--cubingd-background, lightgrey); color: var(--cubingd-color, #111); border: 1px solid #888; border-radius: 8px; padding: 12px; box-shadow: 0 8px 24px #0005; }
+        
+        .image-upload {
+            width: 250px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .upload-box {
+            width: 250px;
+            height: 60px;
+            border: 2px solid #aaa;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+
+        .upload-box:hover {
+            border-color: var(--cubingd-accent);
+        }
+
+        #imagePreview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #imagePreview[hidden] {
+            display: none;
+        }
+        #uploadText {
+            font-size: 18px;
+            color: #555;
+        }
+        #uploadMessage {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #d00;
+        }
     </style>
 </head>
 <body>
@@ -261,31 +303,41 @@
         <div class="dialog-footer"><button type="button" id="close-solve">Close</button></div>
     </dialog>
 
-<div class="popup">
-    <button type="button" onclick="document.getElementById('shortcutsPopup').showModal()">
-        Keyboard Shortcuts
-    </button>
-</div>
+    <div class="popup">
+        <button type="button" onclick="document.getElementById('shortcutsPopup').showModal()">
+            Keyboard Shortcuts
+        </button>
+    </div>
 
-<dialog id="shortcutsPopup" class="solve-dialog">
-    <h2>Keyboard Shortcuts</h2>
+    <dialog id="shortcutsPopup" class="solve-dialog">
+        <h2>Keyboard Shortcuts</h2>
+        <p>Space = Start / Stop Timer</p>
+        <p>I = 15-second Inspection</p>
+        <p>N = New Scramble</p>
+        <p>P = Choose Puzzle</p>
+        <p>S = Manage Sessions</p>
+        <p>G = Show Graph</p>
+        <p>E = Export CSV</p>
+        <p>T = Change Theme</p>
+        <p>Ctrl+Z = Delete Last Solve</p>
+        <p>Ctrl+2 = +2 Penalty</p>
+        <p>Ctrl+3 = DNF</p>
+        <div class="dialog-footer" style="margin-top: 16px;">
+            <button type="button" onclick="document.getElementById('shortcutsPopup').close()">
+                Close
+            </button>
+        </div>
+    </dialog>
 
-    <p>Space = Start / Stop Timer</p>
-    <p>I = 15-second Inspection</p>
-    <p>N = New Scramble</p>
-    <p>P = Choose Puzzle</p>
-    <p>S = Manage Sessions</p>
-    <p>G = Show Graph</p>
-    <p>E = Export CSV</p>
-    <p>T = Change Theme</p>
-    <p>Ctrl+Z = Delete Last Solve</p>
-    <p>Ctrl+2 = +2 Penalty</p>
-    <p>Ctrl+3 = DNF</p>
-
-    <button type="button" onclick="document.getElementById('shortcutsPopup').close()">
-        Close
-    </button>
-</dialog>
+    <div class="image-upload">
+        <label for="imageInput" class="upload-box">
+            + Change Background
+        </label>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+    </div>
+    <div class="controls">
+        <button type="button" id="reset-btn">Reset Background</button>
+    </div>
 
     <script>
     (() => {
@@ -1042,6 +1094,35 @@
             }
         });
 
+        const resetBtn = document.getElementById("reset-btn");
+        const imageInput = document.getElementById("imageInput");
+
+        resetBtn.addEventListener("click", () => {
+            document.body.style.backgroundImage = "";
+            document.body.style.backgroundSize = "";
+            document.body.style.backgroundPosition = "";
+            document.body.style.backgroundRepeat = "";
+            document.body.style.backgroundAttachment = "";
+            imageInput.value = "";
+            applyTheme();
+            resetBtn.blur();
+        });
+
+        imageInput.addEventListener("change", () => {
+            const file = imageInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.body.style.backgroundImage = `url("${e.target.result}")`;
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundPosition = "center";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundAttachment = "fixed";
+            };
+            reader.readAsDataURL(file);
+        });
+
         document.getElementById("newScramble")?.addEventListener("click", () => {
             if (!timerRunning && !inspectionActive) generateScramble();
         });
@@ -1058,10 +1139,6 @@
         generateScramble();
         updateUI();
     })();
-     var localStorage = window.localStorage;
-    var foo = localStorage.getIten("bar");
-
-    localStorage.setItem("bar", foo);ss
     </script>
 </body>
 </html>
