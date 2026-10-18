@@ -215,6 +215,7 @@
             font-weight: bold;
         }
         .dialog-footer { display: flex; justify-content: flex-end; }
+        .popup { position: fixed; bottom: 20px; right: 20px; background: var(--cubingd-background, lightgrey); color: var(--cubingd-color, #111); border: 1px solid #888; border-radius: 8px; padding: 12px; box-shadow: 0 8px 24px #0005; }
     </style>
 </head>
 <body>
@@ -259,7 +260,10 @@
         </div>
         <div class="dialog-footer"><button type="button" id="close-solve">Close</button></div>
     </dialog>
-
+<div class="popup" if="popup">
+    <button onClick="alert('Keyboard Shortcuts: Ctrl+2=+2(Penalty) \nctrl+3=DNF')">Keyboard Shortcuts</button>
+    </div>
+</div>
     <script>
     (() => {
         const STORAGE_KEY = "cubingD_data_v1";
