@@ -215,49 +215,45 @@
             font-weight: bold;
         }
         .dialog-footer { display: flex; justify-content: flex-end; }
-        .popup { position: fixed; bottom: 20px; right: 20px; background: var(--cubingd-background, lightgrey); color: var(--cubingd-color, #111); border: 1px solid #888; border-radius: 8px; padding: 12px; box-shadow: 0 8px 24px #0005; }
-        
-        .image-upload {
-            width: 250px;
-            margin: 20px auto;
-            text-align: center;
-        }
+       .popup {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--cubingd-background, lightgrey);
+        border: 1px solid #888;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 4px 12px #0005;
+        display: flex;
+        gap: 10px;
+       }
+       .settings-row {
+        margin: 12px 0;
+       }
 
-        .upload-box {
-            width: 250px;
-            height: 60px;
-            border: 2px solid #aaa;
+       .settings-row button {
+        margin: 12px 0;
+       }
+       .image-upload {
+        with 100%'
+        margin: 12px 0;
+        text-align: center;
+       }
+       .upload-box {
+        width: 100%;
+            height: 80px;
+            box-sizing: border-box;
+            border: 2px dashed #aaa;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            overflow: hidden;
             transition: border-color 0.3s;
-        }
-
-        .upload-box:hover {
-            border-color: var(--cubingd-accent);
-        }
-
-        #imagePreview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        #imagePreview[hidden] {
-            display: none;
-        }
-        #uploadText {
-            font-size: 18px;
-            color: #555;
-        }
-        #uploadMessage {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #d00;
-        }
+       }
+       .upload-box:hover {
+        border-color: var(--cubingd-accent);
+       }
     </style>
 </head>
 <body>
@@ -303,842 +299,1144 @@
         <div class="dialog-footer"><button type="button" id="close-solve">Close</button></div>
     </dialog>
 
-    <div class="popup">
-        <button type="button" onclick="document.getElementById('shortcutsPopup').showModal()">
-            Keyboard Shortcuts
-        </button>
+   <div class="popup">
+    <button type="button" onclick="document.getElementById('settingsPopup').showModal()">
+        Settings
+    </button>
+    <button type="button" onclick="document.getElementById('shortcutsPopup').showModal()">
+        Keyboard Shortcuts
+    </button>
+</div>
+
+<dialog id="settingsPopup" class="solve-dialog">
+    <h2>Settings</h2>
+
+    <h3>Colour Theme</h3>
+    <div class="settings-row">
+        <button type="button" id="themeButton">Switch Theme (T)</button>
     </div>
 
-    <dialog id="shortcutsPopup" class="solve-dialog">
-        <h2>Keyboard Shortcuts</h2>
-        <p>Space = Start / Stop Timer</p>
-        <p>I = 15-second Inspection</p>
-        <p>N = New Scramble</p>
-        <p>P = Choose Puzzle</p>
-        <p>S = Manage Sessions</p>
-        <p>G = Show Graph</p>
-        <p>E = Export CSV</p>
-        <p>T = Change Theme</p>
-        <p>Ctrl+Z = Delete Last Solve</p>
-        <p>Ctrl+2 = +2 Penalty</p>
-        <p>Ctrl+3 = DNF</p>
-        <div class="dialog-footer" style="margin-top: 16px;">
-            <button type="button" onclick="document.getElementById('shortcutsPopup').close()">
-                Close
-            </button>
-        </div>
-    </dialog>
-
+    <h3>Custom Background</h3>
     <div class="image-upload">
         <label for="imageInput" class="upload-box">
-            + Change Background
+            + Upload Background Image
         </label>
         <input type="file" id="imageInput" accept="image/*" hidden>
     </div>
-    <div class="controls">
+
+    <div class="settings-row">
         <button type="button" id="reset-btn">Reset Background</button>
     </div>
 
-    <script>
-    (() => {
-        const STORAGE_KEY = "cubingD_data_v1";
+    <div class="dialog-footer" style="margin-top: 24px;">
+        <button type="button" onclick="document.getElementById('settingsPopup').close()">
+            Done
+        </button>
+    </div>
+</dialog>
 
-        const puzzles = [
-            "3x3", "2x2", "4x4", "5x5", "6x6", "7x7",
-            "3x3 OH", "3x3 Blindfolded", "Pyraminx",
-            "Skewb", "Megaminx", "Square-1"
-        ];
+<dialog id="shortcutsPopup" class="solve-dialog">
+    <h2>Keyboard Shortcuts</h2>
 
-        const themes = [
-            { name: "Default", background: "lightgrey", color: "#111111", accent: "#55dd88" },
-            { name: "Midnight", background: "#121212", color: "#eeeeee", accent: "#7cfc00" },
-            { name: "Ocean", background: "#102536", color: "#e4f4ff", accent: "#35c8ff" },
-            { name: "Purple", background: "#20152d", color: "#f4eaff", accent: "#c084fc" }
-        ];
+    <p>Space = Start / Stop Timer</p>
+    <p>I = 15-second Inspection</p>
+    <p>N = New Scramble</p>
+    <p>P = Choose Puzzle</p>
+    <p>S = Manage Sessions</p>
+    <p>G = Show Graph</p>
+    <p>E = Export CSV</p>
+    <p>T = Change Theme</p>
+    <p>Ctrl+Z = Delete Last Solve</p>
+    <p>Ctrl+2 = +2 Penalty</p>
+    <p>Ctrl+3 = DNF</p>
 
-        const scrambleEl = document.querySelector(".centre h1");
-        const timesContainer = document.querySelector(".left");
-        const timeInput = document.querySelector(".input input");
-        const averages = document.querySelector(".averages");
-        const ao5El = averages.querySelector("h1:nth-child(1)");
-        const ao12El = averages.querySelector("h1:nth-child(2)");
+    <div class="dialog-footer" style="margin-top: 16px;">
+        <button type="button" onclick="document.getElementById('shortcutsPopup').close()">
+            Close
+        </button>
+    </div>
+</dialog>
 
-        function loadData() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+<script>
+   (() => {
+    "use strict";
 
-                if (saved && saved.sessions && Object.keys(saved.sessions).length) {
-                    for (const session of Object.values(saved.sessions)) {
-                        session.times = (session.times || []).map(t =>
-                            typeof t === "number"
-                                ? {
-                                    time: t,
+    const STORAGE_KEY = "cubingD_data_v1";
+
+    const puzzles = [
+        "3x3", "2x2", "4x4", "5x5", "6x6", "7x7",
+        "3x3 OH", "3x3 Blindfolded", "Pyraminx",
+        "Skewb", "Megaminx", "Square-1"
+    ];
+
+    const themes = [
+        { name: "Default", background: "lightgrey", color: "#111111", accent: "#55dd88" },
+        { name: "Midnight", background: "#121212", color: "#eeeeee", accent: "#7cfc00" },
+        { name: "Ocean", background: "#102536", color: "#e4f4ff", accent: "#35c8ff" },
+        { name: "Purple", background: "#20152d", color: "#f4eaff", accent: "#c084fc" }
+    ];
+
+    const scrambleEl = document.querySelector(".centre h1");
+    const timesContainer = document.querySelector(".left");
+    const timeInput = document.querySelector(".input input");
+    const averages = document.querySelector(".averages");
+    const ao5El = averages.querySelector("h1:nth-child(1)");
+    const ao12El = averages.querySelector("h1:nth-child(2)");
+
+    const solveDialog = document.getElementById("solve-dialog");
+    const settingsPopup = document.getElementById("settingsPopup");
+    const shortcutsPopup = document.getElementById("shortcutsPopup");
+    const imageInput = document.getElementById("imageInput");
+    const resetBtn = document.getElementById("reset-btn");
+    const themeButton = document.getElementById("themeButton");
+
+    const penaltyButtons = solveDialog.querySelectorAll("[data-penalty]");
+
+    let data;
+    let currentSession;
+    let times;
+    let currentPuzzle;
+    let currentScramble = "";
+    let themeIndex = 0;
+
+    let inspectionInterval = null;
+    let inspectionStart = 0;
+    let timerInterval = null;
+    let timerStart = 0;
+
+    let inspectionActive = false;
+    let timerRunning = false;
+    let displayMode = "scramble";
+    let selectedSolveIndex = null;
+    let uploadedBackgroundUrl = null;
+
+    function loadData() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+            if (saved && saved.sessions && typeof saved.sessions === "object") {
+                for (const session of Object.values(saved.sessions)) {
+                    if (!session || typeof session !== "object") continue;
+
+                    session.times = (Array.isArray(session.times) ? session.times : [])
+                        .filter(solve =>
+                            typeof solve === "number" ||
+                            (solve && typeof solve === "object" &&
+                                Number.isFinite(Number(solve.time)))
+                        )
+                        .map(solve => {
+                            if (typeof solve === "number") {
+                                return {
+                                    time: solve,
                                     penalty: "",
                                     scramble: "",
                                     date: new Date().toISOString(),
-                                    puzzle: "3x3"
-                                }
-                                : t
-                        );
-                        session.puzzle = session.puzzle || "3x3";
+                                    puzzle: session.puzzle || "3x3"
+                                };
+                            }
+
+                            return {
+                                time: Number(solve.time),
+                                penalty: ["", "+2", "DNF"].includes(solve.penalty)
+                                    ? solve.penalty
+                                    : "",
+                                scramble: typeof solve.scramble === "string"
+                                    ? solve.scramble
+                                    : "",
+                                date: solve.date || new Date().toISOString(),
+                                puzzle: solve.puzzle || session.puzzle || "3x3"
+                            };
+                        });
+
+                    session.puzzle = puzzles.includes(session.puzzle)
+                        ? session.puzzle
+                        : "3x3";
+                }
+
+                if (Object.keys(saved.sessions).length > 0) {
+                    if (!saved.sessions[saved.currentSession]) {
+                        saved.currentSession = Object.keys(saved.sessions)[0];
                     }
 
-                    if (saved.sessions[saved.currentSession]) return saved;
-                }
-            } catch (error) {
-                console.warn("Could not load CubingD data:", error);
-            }
+                    saved.themeIndex = Number.isInteger(saved.themeIndex)
+                        ? ((saved.themeIndex % themes.length) + themes.length) % themes.length
+                        : 0;
 
-            return {
-                currentSession: "Session 1",
-                sessions: {
-                    "Session 1": { times: [], puzzle: "3x3" }
-                },
-                themeIndex: 0
+                    return saved;
+                }
+            }
+        } catch (error) {
+            console.warn("Could not load CubingD data:", error);
+        }
+
+        return {
+            currentSession: "Session 1",
+            sessions: {
+                "Session 1": { times: [], puzzle: "3x3" }
+            },
+            themeIndex: 0
+        };
+    }
+
+    data = loadData();
+    currentSession = data.currentSession;
+    times = data.sessions[currentSession].times;
+    currentPuzzle = data.sessions[currentSession].puzzle || "3x3";
+    themeIndex = data.themeIndex || 0;
+
+    function saveData() {
+        data.currentSession = currentSession;
+        data.themeIndex = themeIndex;
+
+        if (!data.sessions[currentSession]) {
+            data.sessions[currentSession] = {
+                times: [],
+                puzzle: currentPuzzle
             };
         }
 
-        let data = loadData();
-        let currentSession = data.currentSession;
-        let times = data.sessions[currentSession].times;
-        let currentPuzzle = data.sessions[currentSession].puzzle || "3x3";
-        let currentScramble = "";
-        let themeIndex = data.themeIndex || 0;
-        let inspectionInterval = null;
-        let inspectionStart = 0;
-        let timerInterval = null;
-        let timerStart = 0;
-        let inspectionActive = false;
-        let timerRunning = false;
-        let displayMode = "scramble";
+        data.sessions[currentSession].times = times;
+        data.sessions[currentSession].puzzle = currentPuzzle;
 
-        function saveData() {
-            data.currentSession = currentSession;
-            data.themeIndex = themeIndex;
-            data.sessions[currentSession].times = times;
-            data.sessions[currentSession].puzzle = currentPuzzle;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (error) {
+            console.warn("Could not save CubingD data:", error);
+        }
+    }
 
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            } catch (error) {
-                alert("Could not save your solves. Browser storage may be full.");
+    function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) return "--";
+
+        const minutes = Math.floor(seconds / 60);
+        const remaining = (seconds % 60).toFixed(2);
+
+        if (minutes > 0) {
+            return `${minutes}:${Number(remaining) < 10 ? "0" : ""}${remaining}`;
+        }
+
+        return remaining;
+    }
+
+    function displaySolve(solve) {
+        if (!solve || solve.penalty === "DNF") return "DNF";
+
+        return formatTime(solve.time + (solve.penalty === "+2" ? 2 : 0))
+            + (solve.penalty === "+2" ? "+" : "");
+    }
+
+    function effectiveTime(solve) {
+        if (!solve || solve.penalty === "DNF") return Infinity;
+
+        return solve.time + (solve.penalty === "+2" ? 2 : 0);
+    }
+
+    function calculateWCAAverage(solves, count) {
+        if (solves.length < count) return "--";
+
+        const subset = solves.slice(-count).map(solve => effectiveTime(solve));
+        subset.sort((a, b) => a - b);
+
+        subset.shift();
+        subset.pop();
+
+        if (subset.some(value => !Number.isFinite(value))) return "DNF";
+
+        return formatTime(
+            subset.reduce((sum, value) => sum + value, 0) / subset.length
+        );
+    }
+
+    function updateUI(scrollToLatest = true) {
+        const previousScroll = timesContainer.scrollTop;
+
+        timesContainer.replaceChildren();
+
+        const heading = document.createElement("h1");
+        heading.textContent = "CubingD";
+
+        const label = document.createElement("p");
+        label.className = "times";
+        label.textContent = "Times";
+
+        const sessionLabel = document.createElement("p");
+        sessionLabel.textContent = `${currentSession} · ${currentPuzzle}`;
+        sessionLabel.style.fontSize = "0.8em";
+        sessionLabel.style.opacity = "0.65";
+        sessionLabel.style.marginTop = "8px";
+
+        timesContainer.append(heading, label, sessionLabel);
+
+        times.slice().reverse().forEach((solve, reverseIndex) => {
+            const index = times.length - 1 - reverseIndex;
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "solve-row";
+            button.dataset.solveIndex = String(index);
+            button.setAttribute("aria-haspopup", "dialog");
+            button.textContent = `${index + 1}. ${displaySolve(solve)}`;
+            button.title = "Click for solve details; right-click for more options";
+
+            if (solve.penalty) {
+                button.classList.add("solve-penalty");
             }
-        }
 
-        function formatTime(seconds) {
-            if (!Number.isFinite(seconds) || seconds < 0) return "--";
-
-            const mins = Math.floor(seconds / 60);
-            const secs = (seconds % 60).toFixed(2);
-
-            if (mins > 0) {
-                return `${mins}:${Number(secs) < 10 ? "0" : ""}${secs}`;
-            }
-
-            return secs;
-        }
-
-        function displaySolve(solve) {
-            if (solve.penalty === "DNF") return "DNF";
-
-            return formatTime(solve.time + (solve.penalty === "+2" ? 2 : 0))
-                + (solve.penalty === "+2" ? "+" : "");
-        }
-
-        function effectiveTime(solve) {
-            if (solve.penalty === "DNF") return Infinity;
-            return solve.time + (solve.penalty === "+2" ? 2 : 0);
-        }
-
-        function calculateWCAAverage(solves, count) {
-            if (solves.length < count) return "--";
-
-            const subset = solves.slice(-count).map(s => ({
-                ...s,
-                value: effectiveTime(s)
-            }));
-
-            subset.sort((a, b) => a.value - b.value);
-            subset.shift();
-            subset.pop();
-
-            if (subset.some(s => s.value === Infinity)) return "DNF";
-
-            const mean = subset.reduce((sum, s) => sum + s.value, 0) / subset.length;
-
-            return formatTime(mean);
-        }
-
-        function updateUI(scrollToLatest = true) {
-            const previousScroll = timesContainer.scrollTop;
-            timesContainer.innerHTML = "<h1>CubingD</h1><p class='times'>Times</p>";
-
-            const sessionLabel = document.createElement("p");
-            sessionLabel.textContent = currentSession + " · " + currentPuzzle;
-            sessionLabel.style.fontSize = "0.8em";
-            sessionLabel.style.opacity = "0.65";
-            sessionLabel.style.marginTop = "8px";
-            timesContainer.appendChild(sessionLabel);
-
-            times.slice().reverse().forEach((solve, reverseIndex) => {
-                const index = times.length - 1 - reverseIndex;
-                const p = document.createElement("button");
-                p.type = "button";
-                p.className = "solve-row";
-                p.setAttribute("aria-haspopup", "dialog");
-                p.textContent = `${index + 1}. ${displaySolve(solve)}`;
-                p.title = "Click for scramble and penalties; right-click for more options";
-                p.dataset.solveIndex = index;
-                p.style.cursor = "pointer";
-
-                if (solve.penalty) p.classList.add("solve-penalty");
-
-                timesContainer.appendChild(p);
-            });
-
-            timesContainer.scrollTop = scrollToLatest ? 0 : previousScroll;
-            ao5El.textContent = `Ao5: ${calculateWCAAverage(times, 5)}`;
-            ao12El.textContent = `Ao12: ${calculateWCAAverage(times, 12)}`;
-
-            saveData();
-        }
-
-        const solveDialog = document.getElementById("solve-dialog");
-        const penaltyButtons = solveDialog.querySelectorAll("[data-penalty]");
-        let selectedSolveIndex = null;
-
-        function renderSolveDetails() {
-            const solve = times[selectedSolveIndex];
-            if (!solve) return;
-            document.getElementById("solve-title").textContent = `Solve ${selectedSolveIndex + 1}`;
-            document.getElementById("solve-result").textContent = displaySolve(solve);
-            document.getElementById("solve-meta").textContent =
-                `${solve.puzzle || currentPuzzle} · Original time: ${formatTime(solve.time)} · ${solve.penalty || "OK"}`;
-            document.getElementById("solve-scramble").textContent =
-                solve.scramble || "No scramble was saved for this solve.";
-            penaltyButtons.forEach(button => {
-                button.setAttribute("aria-pressed", String(button.dataset.penalty === (solve.penalty || "")));
-            });
-        }
-
-        timesContainer.addEventListener("click", event => {
-            const row = event.target.closest("[data-solve-index]");
-            if (!row || timerRunning || inspectionActive) return;
-            selectedSolveIndex = Number(row.dataset.solveIndex);
-            renderSolveDetails();
-            solveDialog.showModal();
+            timesContainer.appendChild(button);
         });
+
+        timesContainer.scrollTop = scrollToLatest ? 0 : previousScroll;
+
+        ao5El.textContent = `Ao5: ${calculateWCAAverage(times, 5)}`;
+        ao12El.textContent = `Ao12: ${calculateWCAAverage(times, 12)}`;
+
+        saveData();
+    }
+
+    function renderSolveDetails() {
+        const solve = times[selectedSolveIndex];
+
+        if (!solve) return;
+
+        document.getElementById("solve-title").textContent =
+            `Solve ${selectedSolveIndex + 1}`;
+
+        document.getElementById("solve-result").textContent =
+            displaySolve(solve);
+
+        document.getElementById("solve-meta").textContent =
+            `${solve.puzzle || currentPuzzle} · Original time: ${formatTime(solve.time)} · ${solve.penalty || "OK"}`;
+
+        document.getElementById("solve-scramble").textContent =
+            solve.scramble || "No scramble was saved for this solve.";
 
         penaltyButtons.forEach(button => {
-            button.addEventListener("click", () => {
-                const solve = times[selectedSolveIndex];
-                if (!solve) return;
-                solve.penalty = button.dataset.penalty;
-                updateUI(false);
-                renderSolveDetails();
-            });
+            button.setAttribute(
+                "aria-pressed",
+                String(button.dataset.penalty === (solve.penalty || ""))
+            );
         });
+    }
 
-        document.getElementById("close-solve").addEventListener("click", () => solveDialog.close());
-        solveDialog.addEventListener("click", event => {
-            const rect = solveDialog.getBoundingClientRect();
-            if (event.target === solveDialog &&
-                (event.clientX < rect.left || event.clientX > rect.right ||
-                 event.clientY < rect.top || event.clientY > rect.bottom)) solveDialog.close();
+    timesContainer.addEventListener("click", event => {
+        const row = event.target.closest("[data-solve-index]");
+
+        if (!row || timerRunning || inspectionActive) return;
+
+        selectedSolveIndex = Number(row.dataset.solveIndex);
+
+        if (!times[selectedSolveIndex]) return;
+
+        renderSolveDetails();
+        solveDialog.showModal();
+    });
+
+    penaltyButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const solve = times[selectedSolveIndex];
+
+            if (!solve) return;
+
+            solve.penalty = button.dataset.penalty;
+            updateUI(false);
+            renderSolveDetails();
         });
-        solveDialog.addEventListener("close", () => {
-            const row = timesContainer.querySelector(`[data-solve-index="${selectedSolveIndex}"]`);
+    });
+
+    document.getElementById("close-solve").addEventListener("click", () => {
+        solveDialog.close();
+    });
+
+    solveDialog.addEventListener("click", event => {
+        if (event.target !== solveDialog) return;
+
+        const rect = solveDialog.getBoundingClientRect();
+
+        if (
+            event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom
+        ) {
+            solveDialog.close();
+        }
+    });
+
+    solveDialog.addEventListener("close", () => {
+        const index = selectedSolveIndex;
+        selectedSolveIndex = null;
+
+        if (index !== null) {
+            const row = timesContainer.querySelector(
+                `[data-solve-index="${index}"]`
+            );
+
             if (row) row.focus({ preventScroll: true });
-            selectedSolveIndex = null;
-        });
+        }
+    });
 
-        function generateScramble() {
-            const faceMoves = {
-                "2x2": ["R", "U", "F"],
-                "3x3": ["R", "L", "U", "D", "F", "B"],
-                "3x3 OH": ["R", "L", "U", "D", "F", "B"],
-                "3x3 Blindfolded": ["R", "L", "U", "D", "F", "B"],
-                "4x4": ["R", "L", "U", "D", "F", "B", "Rw", "Uw"],
-                "5x5": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw"],
-                "6x6": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw", "3Rw"],
-                "7x7": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw", "3Rw"],
-                "Pyraminx": ["R", "L", "U", "B"],
-                "Skewb": ["R", "L", "U", "B"],
-                "Megaminx": ["R++", "R--", "D++", "D--", "U"],
-                "Square-1": ["/", "(1,0)", "(0,1)", "(-1,0)", "(0,-1)"]
-            };
+    function generateScramble() {
+        const faceMoves = {
+            "2x2": ["R", "U", "F"],
+            "3x3": ["R", "L", "U", "D", "F", "B"],
+            "3x3 OH": ["R", "L", "U", "D", "F", "B"],
+            "3x3 Blindfolded": ["R", "L", "U", "D", "F", "B"],
+            "4x4": ["R", "L", "U", "D", "F", "B", "Rw", "Uw"],
+            "5x5": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw"],
+            "6x6": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw", "3Rw"],
+            "7x7": ["R", "L", "U", "D", "F", "B", "Rw", "Uw", "Fw", "3Rw"],
+            "Pyraminx": ["R", "L", "U", "B"],
+            "Skewb": ["R", "L", "U", "B"],
+            "Megaminx": ["R++", "R--", "D++", "D--", "U"],
+            "Square-1": ["/", "(1,0)", "(0,1)", "(-1,0)", "(0,-1)"]
+        };
 
-            const faces = faceMoves[currentPuzzle] || faceMoves["3x3"];
-            const modifiers = ["", "'", "2"];
-            const lengths = {
-                "2x2": 11, "3x3": 20, "3x3 OH": 20,
-                "3x3 Blindfolded": 20, "4x4": 40, "5x5": 60,
-                "6x6": 80, "7x7": 100, "Pyraminx": 11,
-                "Skewb": 11, "Megaminx": 70, "Square-1": 15
-            };
+        const lengths = {
+            "2x2": 11,
+            "3x3": 20,
+            "3x3 OH": 20,
+            "3x3 Blindfolded": 20,
+            "4x4": 40,
+            "5x5": 60,
+            "6x6": 80,
+            "7x7": 100,
+            "Pyraminx": 11,
+            "Skewb": 11,
+            "Megaminx": 70,
+            "Square-1": 15
+        };
 
-            const scramble = [];
-            let lastFace = "";
+        const faces = faceMoves[currentPuzzle] || faceMoves["3x3"];
+        const modifiers = ["", "'", "2"];
+        const scramble = [];
+        let lastFace = "";
 
-            for (let i = 0; i < (lengths[currentPuzzle] || 20); i++) {
-                let available = faces.filter(f => f !== lastFace);
-                if (!available.length) available = faces;
+        for (let i = 0; i < (lengths[currentPuzzle] || 20); i++) {
+            let available = faces.filter(face => face !== lastFace);
 
-                const face = available[Math.floor(Math.random() * available.length)];
-                const move = currentPuzzle === "Megaminx" || currentPuzzle === "Square-1"
+            if (!available.length) available = faces;
+
+            const face = available[Math.floor(Math.random() * available.length)];
+
+            const move =
+                currentPuzzle === "Megaminx" || currentPuzzle === "Square-1"
                     ? face
                     : face + modifiers[Math.floor(Math.random() * modifiers.length)];
 
-                scramble.push(move);
-                lastFace = face;
-            }
-
-            currentScramble = scramble.join(" ");
-
-            if (displayMode === "scramble") {
-                scrambleEl.textContent = currentScramble;
-            }
+            scramble.push(move);
+            lastFace = face;
         }
 
-        function addSolve(seconds) {
-            if (!Number.isFinite(seconds) || seconds <= 0) return;
+        currentScramble = scramble.join(" ");
 
-            times.push({
-                time: seconds,
-                penalty: "",
-                scramble: currentScramble,
-                date: new Date().toISOString(),
-                puzzle: currentPuzzle
-            });
-
-            displayMode = "scramble";
-            generateScramble();
-            updateUI();
+        if (displayMode === "scramble") {
+            scrambleEl.textContent = currentScramble;
         }
 
-        timeInput.addEventListener("beforeinput", event => {
-            if (event.data && /[^0-9]/.test(event.data)) event.preventDefault();
+        return currentScramble;
+    }
+
+    function addSolve(seconds) {
+        if (!Number.isFinite(seconds) || seconds <= 0) return;
+
+        times.push({
+            time: seconds,
+            penalty: "",
+            scramble: currentScramble,
+            date: new Date().toISOString(),
+            puzzle: currentPuzzle
         });
 
-        timeInput.addEventListener("input", () => {
-            timeInput.value = timeInput.value.replace(/[^0-9]/g, "");
-        });
+        displayMode = "scramble";
+        generateScramble();
+        updateUI();
+    }
 
-        timeInput.addEventListener("keydown", event => {
-            if (event.key === "." || event.key === ",") {
-                event.preventDefault();
-                return;
-            }
-            if (event.key !== "Enter") return;
-
-            const value = /^[0-9]+$/.test(timeInput.value) ? Number(timeInput.value) / 100 : NaN;
-
-            if (Number.isFinite(value) && value > 0) {
-                addSolve(value);
-                timeInput.value = "";
-            }
-        });
-
-        timesContainer.addEventListener("contextmenu", event => {
-            const row = event.target.closest("[data-solve-index]");
-            if (!row) return;
-
+    timeInput.addEventListener("beforeinput", event => {
+        if (event.data && /[^0-9]/.test(event.data)) {
             event.preventDefault();
+        }
+    });
 
-            const index = Number(row.dataset.solveIndex);
-            const solve = times[index];
-            if (!solve) return;
+    timeInput.addEventListener("input", () => {
+        timeInput.value = timeInput.value.replace(/[^0-9]/g, "");
+    });
 
-            const action = prompt(
-                `Solve ${index + 1}: ${displaySolve(solve)}\n\n` +
-                "1 = Add +2 penalty\n" +
-                "2 = Mark DNF\n" +
-                "3 = Remove penalty\n" +
-                "4 = Edit time\n" +
-                "5 = Delete solve\n" +
-                "6 = View scramble",
-                "1"
-            );
+    timeInput.addEventListener("keydown", event => {
+        if (event.key === "." || event.key === ",") {
+            event.preventDefault();
+            return;
+        }
 
-            switch (action) {
-                case "1":
-                    solve.penalty = "+2";
-                    break;
-                case "2":
-                    solve.penalty = "DNF";
-                    break;
-                case "3":
-                    solve.penalty = "";
-                    break;
-                case "4": {
-                    const newTime = prompt("Enter the solve time in seconds:", String(solve.time));
-                    if (newTime === null) return;
+        if (event.key !== "Enter") return;
 
-                    const value = Number.parseFloat(newTime);
+        const value = /^[0-9]+$/.test(timeInput.value)
+            ? Number(timeInput.value) / 100
+            : NaN;
 
-                    if (!Number.isFinite(value) || value <= 0) {
-                        alert("Please enter a valid time greater than zero.");
-                        return;
-                    }
+        if (Number.isFinite(value) && value > 0) {
+            addSolve(value);
+            timeInput.value = "";
+        }
+    });
 
-                    solve.time = value;
-                    break;
+    timesContainer.addEventListener("contextmenu", event => {
+        const row = event.target.closest("[data-solve-index]");
+
+        if (!row) return;
+
+        event.preventDefault();
+
+        const index = Number(row.dataset.solveIndex);
+        const solve = times[index];
+
+        if (!solve) return;
+
+        const action = prompt(
+            `Solve ${index + 1}: ${displaySolve(solve)}\n\n` +
+            "1 = Add +2 penalty\n" +
+            "2 = Mark DNF\n" +
+            "3 = Remove penalty\n" +
+            "4 = Edit time\n" +
+            "5 = Delete solve\n" +
+            "6 = View scramble",
+            "1"
+        );
+
+        switch (action) {
+            case "1":
+                solve.penalty = "+2";
+                break;
+
+            case "2":
+                solve.penalty = "DNF";
+                break;
+
+            case "3":
+                solve.penalty = "";
+                break;
+
+            case "4": {
+                const newTime = prompt(
+                    "Enter the solve time in seconds:",
+                    String(solve.time)
+                );
+
+                if (newTime === null) return;
+
+                const value = Number(newTime);
+
+                if (!Number.isFinite(value) || value <= 0) {
+                    alert("Please enter a valid time greater than zero.");
+                    return;
                 }
-                case "5":
-                    if (!confirm(`Delete solve ${index + 1}?`)) return;
-                    times.splice(index, 1);
-                    break;
-                case "6":
-                    alert(solve.scramble || "No scramble was saved for this solve.");
-                    return;
-                default:
-                    return;
+
+                solve.time = value;
+                break;
             }
 
-            updateUI();
-        });
+            case "5":
+                if (!confirm(`Delete solve ${index + 1}?`)) return;
 
-        function stopInspection() {
+                times.splice(index, 1);
+                break;
+
+            case "6":
+                alert(solve.scramble || "No scramble was saved for this solve.");
+                return;
+
+            default:
+                return;
+        }
+
+        updateUI();
+    });
+
+    function stopInspection() {
+        if (inspectionInterval !== null) {
             clearInterval(inspectionInterval);
             inspectionInterval = null;
-            inspectionActive = false;
         }
 
-        function startInspection() {
-            if (inspectionActive || timerRunning) return;
+        inspectionActive = false;
+    }
 
-            inspectionActive = true;
-            inspectionStart = Date.now();
-            displayMode = "inspection";
+    function startInspection() {
+        if (inspectionActive || timerRunning) return;
 
-            function tick() {
-                const elapsed = (Date.now() - inspectionStart) / 1000;
-                const remaining = Math.max(0, 15 - elapsed);
+        inspectionActive = true;
+        inspectionStart = Date.now();
+        displayMode = "inspection";
 
-                scrambleEl.textContent = `Inspection: ${remaining.toFixed(1)}s`;
+        function tick() {
+            const elapsed = (Date.now() - inspectionStart) / 1000;
+            const remaining = Math.max(0, 15 - elapsed);
 
-                if (elapsed >= 15) {
-                    stopInspection();
-                    startTimer();
-                }
+            scrambleEl.textContent = `Inspection: ${remaining.toFixed(1)}s`;
+
+            if (elapsed >= 15) {
+                stopInspection();
+                startTimer();
             }
+        }
 
-            tick();
+        tick();
+
+        if (inspectionActive) {
             inspectionInterval = setInterval(tick, 50);
         }
+    }
 
-        function startTimer() {
-            if (timerRunning) return;
+    function startTimer() {
+        if (timerRunning) return;
 
-            stopInspection();
-            timerRunning = true;
-            displayMode = "timer";
-            timerStart = Date.now();
+        stopInspection();
 
-            function tick() {
-                scrambleEl.textContent = formatTime((Date.now() - timerStart) / 1000);
-            }
+        timerRunning = true;
+        displayMode = "timer";
+        timerStart = Date.now();
 
-            tick();
-            timerInterval = setInterval(tick, 20);
-        }
-
-        function stopTimer() {
-            if (!timerRunning) return;
-
-            clearInterval(timerInterval);
-            timerInterval = null;
-            timerRunning = false;
-
-            const elapsed = (Date.now() - timerStart) / 1000;
-
-            displayMode = "scramble";
-            addSolve(elapsed);
-        }
-
-        function switchSession(name) {
-            if (!name || !data.sessions[name]) return;
-
-            currentSession = name;
-            times = data.sessions[name].times;
-            currentPuzzle = data.sessions[name].puzzle || "3x3";
-
-            generateScramble();
-            updateUI();
-        }
-
-        function manageSessions() {
-            const action = prompt(
-                "Sessions:\n" +
-                Object.keys(data.sessions).join("\n") +
-                "\n\nType a session name to switch, NEW to create one, or DELETE to remove the current session."
+        function tick() {
+            scrambleEl.textContent = formatTime(
+                (Date.now() - timerStart) / 1000
             );
+        }
 
-            if (!action) return;
+        tick();
+        timerInterval = setInterval(tick, 20);
+    }
 
-            if (action.toUpperCase() === "NEW") {
-                const name = prompt("Enter a name for your new session:");
+    function stopTimer() {
+        if (!timerRunning) return;
 
-                if (!name || data.sessions[name]) {
-                    alert("That session name is invalid or already exists.");
-                    return;
-                }
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerRunning = false;
 
-                data.sessions[name] = { times: [], puzzle: currentPuzzle };
-                switchSession(name);
+        const elapsed = (Date.now() - timerStart) / 1000;
+
+        displayMode = "scramble";
+        addSolve(elapsed);
+    }
+
+    function switchSession(name) {
+        if (!name || !data.sessions[name]) return;
+
+        currentSession = name;
+        times = data.sessions[name].times;
+        currentPuzzle = data.sessions[name].puzzle || "3x3";
+
+        generateScramble();
+        updateUI();
+    }
+
+    function manageSessions() {
+        const action = prompt(
+            "Sessions:\n" +
+            Object.keys(data.sessions).join("\n") +
+            "\n\nType a session name to switch, NEW to create one, or DELETE to remove the current session."
+        );
+
+        if (!action) return;
+
+        if (action.trim().toUpperCase() === "NEW") {
+            const name = prompt("Enter a name for your new session:");
+
+            if (!name || !name.trim() || data.sessions[name.trim()]) {
+                alert("That session name is invalid or already exists.");
                 return;
             }
 
-            if (action.toUpperCase() === "DELETE") {
-                if (Object.keys(data.sessions).length <= 1) {
-                    alert("You must keep at least one session.");
-                    return;
-                }
+            const cleanName = name.trim();
 
-                if (!confirm(`Delete session "${currentSession}" and all its solves?`)) return;
+            data.sessions[cleanName] = {
+                times: [],
+                puzzle: currentPuzzle
+            };
 
-                delete data.sessions[currentSession];
-                switchSession(Object.keys(data.sessions)[0]);
+            switchSession(cleanName);
+            return;
+        }
+
+        if (action.trim().toUpperCase() === "DELETE") {
+            if (Object.keys(data.sessions).length <= 1) {
+                alert("You must keep at least one session.");
                 return;
             }
 
-            switchSession(action);
-        }
-
-        function selectPuzzle() {
-            const selection = prompt("Choose a puzzle:\n" + puzzles.join(", "), currentPuzzle);
-            if (!selection) return;
-
-            const match = puzzles.find(p => p.toLowerCase() === selection.trim().toLowerCase());
-
-            if (!match) {
-                alert("Unknown puzzle. Choose one of the listed puzzle names.");
+            if (!confirm(`Delete session "${currentSession}" and all its solves?`)) {
                 return;
             }
 
-            currentPuzzle = match;
-            data.sessions[currentSession].puzzle = match;
-            generateScramble();
-            updateUI();
+            delete data.sessions[currentSession];
+            currentSession = Object.keys(data.sessions)[0];
+
+            switchSession(currentSession);
+            return;
         }
 
-        function applyTheme() {
-            const theme = themes[themeIndex % themes.length];
-            document.body.style.backgroundColor = theme.background;
-            document.documentElement.style.setProperty("--cubingd-background", theme.background);
-            document.documentElement.style.setProperty("--cubingd-color", theme.color);
-            document.body.style.color = theme.color;
-            document.documentElement.style.setProperty("--cubingd-accent", theme.accent);
+        switchSession(action.trim());
+    }
+
+    function selectPuzzle() {
+        const selection = prompt(
+            "Choose a puzzle:\n" + puzzles.join(", "),
+            currentPuzzle
+        );
+
+        if (!selection) return;
+
+        const match = puzzles.find(
+            puzzle => puzzle.toLowerCase() === selection.trim().toLowerCase()
+        );
+
+        if (!match) {
+            alert("Unknown puzzle. Choose one of the listed puzzle names.");
+            return;
         }
 
-        function cycleTheme() {
-            themeIndex = (themeIndex + 1) % themes.length;
-            applyTheme();
-            saveData();
+        currentPuzzle = match;
+        data.sessions[currentSession].puzzle = match;
+
+        generateScramble();
+        updateUI();
+    }
+
+    function applyTheme() {
+        const theme = themes[themeIndex % themes.length];
+
+        document.body.style.backgroundColor = theme.background;
+        document.documentElement.style.setProperty(
+            "--cubingd-background",
+            theme.background
+        );
+        document.documentElement.style.setProperty(
+            "--cubingd-color",
+            theme.color
+        );
+        document.documentElement.style.setProperty(
+            "--cubingd-accent",
+            theme.accent
+        );
+
+        document.body.style.color = theme.color;
+
+        if (themeButton) {
+            themeButton.textContent = `Switch Theme (T) · ${theme.name}`;
+        }
+    }
+
+    function cycleTheme() {
+        themeIndex = (themeIndex + 1) % themes.length;
+        applyTheme();
+        saveData();
+    }
+
+    function exportCSV() {
+        const rows = [
+            [
+                "Session", "Puzzle", "Solve", "Raw seconds",
+                "Penalty", "Displayed result", "Scramble", "Date"
+            ]
+        ];
+
+        times.forEach((solve, index) => {
+            rows.push([
+                currentSession,
+                solve.puzzle || currentPuzzle,
+                index + 1,
+                solve.time,
+                solve.penalty || "None",
+                displaySolve(solve),
+                solve.scramble || "",
+                solve.date || ""
+            ]);
+        });
+
+        const csv = rows.map(row =>
+            row.map(value =>
+                '"' + String(value).replace(/"/g, '""') + '"'
+            ).join(",")
+        ).join("\r\n");
+
+        const blob = new Blob(["\uFEFF" + csv], {
+            type: "text/csv;charset=utf-8;"
+        });
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `${currentSession.replace(/[^a-z0-9_-]/gi, "_")}.csv`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function showGraph() {
+        const old = document.getElementById("cubingd-graph");
+
+        if (old) old.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "cubingd-graph";
+
+        Object.assign(overlay.style, {
+            position: "fixed",
+            inset: "0",
+            zIndex: "9999",
+            background: "rgba(0,0,0,0.92)",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            boxSizing: "border-box"
+        });
+
+        const title = document.createElement("h2");
+        title.textContent = `Solve Graph — ${currentSession}`;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = 900;
+        canvas.height = 420;
+
+        Object.assign(canvas.style, {
+            width: "100%",
+            maxWidth: "900px",
+            background: "#181818",
+            borderRadius: "8px"
+        });
+
+        const close = document.createElement("button");
+        close.textContent = "Close";
+        close.style.marginTop = "16px";
+        close.addEventListener("click", () => overlay.remove());
+
+        overlay.append(title, canvas, close);
+        document.body.appendChild(overlay);
+
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+            ctx.fillStyle = "white";
+            ctx.fillText("Graph could not be displayed.", 30, 60);
+            return;
         }
 
-        function exportCSV() {
-            const rows = [
-                ["Session", "Puzzle", "Solve", "Raw seconds", "Penalty", "Displayed result", "Scramble", "Date"]
-            ];
+        const valid = times
+            .map((solve, index) => ({
+                index: index + 1,
+                time: effectiveTime(solve)
+            }))
+            .filter(point => Number.isFinite(point.time));
 
-            times.forEach((solve, index) => {
-                rows.push([
-                    currentSession,
-                    solve.puzzle || currentPuzzle,
-                    index + 1,
-                    solve.time,
-                    solve.penalty || "None",
-                    displaySolve(solve),
-                    solve.scramble || "",
-                    solve.date || ""
-                ]);
-            });
+        ctx.fillStyle = "#181818";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const csv = rows.map(row =>
-                row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(",")
-            ).join("\r\n");
-
-            const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download = `${currentSession.replace(/[^a-z0-9_-]/gi, "_")}.csv`;
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(url);
+        if (valid.length < 2) {
+            ctx.fillStyle = "white";
+            ctx.font = "20px sans-serif";
+            ctx.fillText(
+                "Add at least two non-DNF solves to see a graph.",
+                30,
+                60
+            );
+            return;
         }
 
-        function showGraph() {
-            const old = document.getElementById("cubingd-graph");
-            if (old) old.remove();
+        const left = 65;
+        const right = 25;
+        const top = 30;
+        const bottom = 55;
+        const width = canvas.width - left - right;
+        const height = canvas.height - top - bottom;
+        const maxTime = Math.max(...valid.map(point => point.time)) * 1.1 || 1;
 
-            const overlay = document.createElement("div");
-            overlay.id = "cubingd-graph";
+        ctx.strokeStyle = "#555";
+        ctx.fillStyle = "#ddd";
+        ctx.font = "13px sans-serif";
+        ctx.lineWidth = 1;
 
-            Object.assign(overlay.style, {
-                position: "fixed",
-                inset: "0",
-                zIndex: "9999",
-                background: "rgba(0,0,0,0.92)",
-                color: "white",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "20px",
-                boxSizing: "border-box"
-            });
+        for (let i = 0; i <= 5; i++) {
+            const y = top + height * i / 5;
+            const value = maxTime * (1 - i / 5);
 
-            const title = document.createElement("h2");
-            title.textContent = `Solve Graph — ${currentSession}`;
-
-            const canvas = document.createElement("canvas");
-            canvas.width = 900;
-            canvas.height = 420;
-
-            Object.assign(canvas.style, {
-                width: "100%",
-                maxWidth: "900px",
-                background: "#181818",
-                borderRadius: "8px"
-            });
-
-            const close = document.createElement("button");
-            close.textContent = "Close";
-            close.style.marginTop = "16px";
-            close.onclick = () => overlay.remove();
-
-            overlay.append(title, canvas, close);
-            document.body.appendChild(overlay);
-
-            const ctx = canvas.getContext("2d");
-            const valid = times
-                .map((s, i) => ({ index: i + 1, time: effectiveTime(s) }))
-                .filter(p => Number.isFinite(p.time));
-
-            ctx.fillStyle = "#181818";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if (valid.length < 2) {
-                ctx.fillStyle = "white";
-                ctx.font = "20px sans-serif";
-                ctx.fillText("Add at least two non-DNF solves to see a graph.", 30, 60);
-                return;
-            }
-
-            const left = 65;
-            const right = 25;
-            const top = 30;
-            const bottom = 55;
-            const width = canvas.width - left - right;
-            const height = canvas.height - top - bottom;
-            const maxTime = Math.max(...valid.map(p => p.time)) * 1.1 || 1;
-            const minTime = 0;
-
-            ctx.strokeStyle = "#555";
-            ctx.fillStyle = "#ddd";
-            ctx.font = "13px sans-serif";
-            ctx.lineWidth = 1;
-
-            for (let i = 0; i <= 5; i++) {
-                const y = top + height * i / 5;
-                const value = maxTime - (maxTime - minTime) * i / 5;
-
-                ctx.beginPath();
-                ctx.moveTo(left, y);
-                ctx.lineTo(canvas.width - right, y);
-                ctx.stroke();
-                ctx.fillText(value.toFixed(1) + "s", 8, y + 4);
-            }
-
-            ctx.strokeStyle = "#55dd88";
-            ctx.lineWidth = 3;
             ctx.beginPath();
-
-            valid.forEach((p, i) => {
-                const x = left + ((p.index - 1) / Math.max(1, times.length - 1)) * width;
-                const y = top + height - (p.time - minTime) / Math.max(0.001, maxTime - minTime) * height;
-
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            });
-
+            ctx.moveTo(left, y);
+            ctx.lineTo(canvas.width - right, y);
             ctx.stroke();
 
-            valid.forEach(p => {
-                const x = left + ((p.index - 1) / Math.max(1, times.length - 1)) * width;
-                const y = top + height - (p.time - minTime) / Math.max(0.001, maxTime - minTime) * height;
-
-                ctx.fillStyle = "#55dd88";
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI * 2);
-                ctx.fill();
-            });
-
-            ctx.fillStyle = "white";
-            ctx.fillText("Solve number", canvas.width / 2 - 35, canvas.height - 12);
+            ctx.fillText(`${value.toFixed(1)}s`, 8, y + 4);
         }
 
-        function showHelp() {
-            alert(
-                "CubingD keyboard shortcuts\n\n" +
-                "Space = Start/stop timer\n" +
-                "I = 15-second inspection\n" +
-                "N = New scramble\n" +
-                "P = Choose puzzle\n" +
-                "S = Manage sessions\n" +
-                "G = Show solve graph\n" +
-                "E = Export CSV\n" +
-                "T = Change theme\n" +
-                "Ctrl+Z = Delete last solve\n" +
-                "Ctrl+2 = Add +2 penalty\n" +
-                "Ctrl+3 = Mark last solve DNF\n" +
-                "Click a solve = View scramble and choose OK, +2 or DNF\n" +
-                "Right-click a solve = Edit, delete or apply penalties\n" +
-                "Escape = Cancel inspection / close graph"
-            );
-        }
+        ctx.strokeStyle = "#55dd88";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
 
-        document.addEventListener("keydown", event => {
-            if (solveDialog.open) return;
-            const target = event.target;
-            const typing = target.matches("input, textarea, select") || target.isContentEditable;
+        valid.forEach((point, index) => {
+            const x = left +
+                ((point.index - 1) / Math.max(1, times.length - 1)) * width;
 
-            if (event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
-                switch (event.code) {
-                    case "KeyZ":
-                        event.preventDefault();
-                        if (times.length > 0) {
-                            times.pop();
-                            updateUI();
-                        }
-                        return;
+            const y = top + height -
+                (point.time / maxTime) * height;
 
-                    case "Digit2":
-                    case "Numpad2":
-                        event.preventDefault();
-                        if (times.length > 0) {
-                            times[times.length - 1].penalty = "+2";
-                            updateUI();
-                        }
-                        return;
-
-                    case "Digit3":
-                    case "Numpad3":
-                        event.preventDefault();
-                        if (times.length > 0) {
-                            times[times.length - 1].penalty = "DNF";
-                            updateUI();
-                        }
-                        return;
-                }
-            }
-
-            if (typing || target.closest("button")) return;
-
-            if (event.key === "Escape") {
-                stopInspection();
-
-                const graph = document.getElementById("cubingd-graph");
-                if (graph) graph.remove();
-
-                if (!timerRunning) {
-                    displayMode = "scramble";
-                    scrambleEl.textContent = currentScramble;
-                }
-                return;
-            }
-
-            if (event.code === "Space") {
-                event.preventDefault();
-
-                if (timerRunning) {
-                    stopTimer();
-                } else if (!inspectionActive) {
-                    startTimer();
-                }
-                return;
-            }
-
-            if (event.ctrlKey || event.altKey || event.metaKey) return;
-
-            switch (event.key.toLowerCase()) {
-                case "i":
-                    startInspection();
-                    break;
-                case "n":
-                    if (!timerRunning && !inspectionActive) generateScramble();
-                    break;
-                case "p":
-                    selectPuzzle();
-                    break;
-                case "s":
-                    manageSessions();
-                    break;
-                case "g":
-                    showGraph();
-                    break;
-                case "e":
-                    exportCSV();
-                    break;
-                case "t":
-                    cycleTheme();
-                    break;
-                case "h":
-                    showHelp();
-                    break;
-            }
+            if (index === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
         });
 
-        const resetBtn = document.getElementById("reset-btn");
-        const imageInput = document.getElementById("imageInput");
+        ctx.stroke();
 
-        resetBtn.addEventListener("click", () => {
-            document.body.style.backgroundImage = "";
-            document.body.style.backgroundSize = "";
-            document.body.style.backgroundPosition = "";
-            document.body.style.backgroundRepeat = "";
-            document.body.style.backgroundAttachment = "";
+        valid.forEach(point => {
+            const x = left +
+                ((point.index - 1) / Math.max(1, times.length - 1)) * width;
+
+            const y = top + height -
+                (point.time / maxTime) * height;
+
+            ctx.fillStyle = "#55dd88";
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.fillStyle = "white";
+        ctx.fillText("Solve number", canvas.width / 2 - 35, canvas.height - 12);
+    }
+
+    function showHelp() {
+        alert(
+            "CubingD keyboard shortcuts\n\n" +
+            "Space = Start/stop timer\n" +
+            "I = 15-second inspection\n" +
+            "N = New scramble\n" +
+            "P = Choose puzzle\n" +
+            "S = Manage sessions\n" +
+            "G = Show solve graph\n" +
+            "E = Export CSV\n" +
+            "T = Change theme\n" +
+            "Ctrl+Z = Delete last solve\n" +
+            "Ctrl+2 = Add +2 penalty\n" +
+            "Ctrl+3 = Mark last solve DNF\n" +
+            "Click a solve = View details and penalties\n" +
+            "Right-click a solve = Edit or delete\n" +
+            "Escape = Cancel inspection / close graph"
+        );
+    }
+
+    function closeGraph() {
+        const graph = document.getElementById("cubingd-graph");
+
+        if (graph) graph.remove();
+    }
+
+    function resetBackground() {
+        document.body.style.backgroundImage = "none";
+        document.body.style.backgroundSize = "";
+        document.body.style.backgroundPosition = "";
+        document.body.style.backgroundRepeat = "";
+        document.body.style.backgroundAttachment = "";
+
+        if (uploadedBackgroundUrl) {
+            URL.revokeObjectURL(uploadedBackgroundUrl);
+            uploadedBackgroundUrl = null;
+        }
+
+        imageInput.value = "";
+        applyTheme();
+    }
+
+    imageInput.addEventListener("change", () => {
+        const file = imageInput.files && imageInput.files[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image file.");
             imageInput.value = "";
-            applyTheme();
-            resetBtn.blur();
-        });
+            return;
+        }
 
-        imageInput.addEventListener("change", () => {
-            const file = imageInput.files[0];
-            if (!file) return;
+        if (uploadedBackgroundUrl) {
+            URL.revokeObjectURL(uploadedBackgroundUrl);
+        }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.body.style.backgroundImage = `url("${e.target.result}")`;
-                document.body.style.backgroundSize = "cover";
-                document.body.style.backgroundPosition = "center";
-                document.body.style.backgroundRepeat = "no-repeat";
-                document.body.style.backgroundAttachment = "fixed";
-            };
-            reader.readAsDataURL(file);
-        });
+        uploadedBackgroundUrl = URL.createObjectURL(file);
 
-        document.getElementById("newScramble")?.addEventListener("click", () => {
+        document.body.style.backgroundImage =
+            `url("${uploadedBackgroundUrl}")`;
+
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+        document.body.style.backgroundRepeat = "no-repeat";
+        document.body.style.backgroundAttachment = "fixed";
+    });
+
+    resetBtn.addEventListener("click", () => {
+        resetBackground();
+        resetBtn.blur();
+    });
+
+    themeButton.addEventListener("click", cycleTheme);
+
+    document.addEventListener("keydown", event => {
+        if (solveDialog.open || settingsPopup.open || shortcutsPopup.open) {
+            if (event.key === "Escape") return;
+            return;
+        }
+
+        const target = event.target;
+        const typing = target instanceof HTMLElement &&
+            (target.matches("input, textarea, select") || target.isContentEditable);
+
+        if (
+            event.ctrlKey &&
+            !event.shiftKey &&
+            !event.altKey &&
+            !event.metaKey
+        ) {
+            switch (event.code) {
+                case "KeyZ":
+                    if (typing) return;
+
+                    event.preventDefault();
+
+                    if (times.length > 0) {
+                        times.pop();
+                        updateUI();
+                    }
+                    return;
+
+                case "Digit2":
+                case "Numpad2":
+                    if (typing) return;
+
+                    event.preventDefault();
+
+                    if (times.length > 0) {
+                        times[times.length - 1].penalty = "+2";
+                        updateUI();
+                    }
+                    return;
+
+                case "Digit3":
+                case "Numpad3":
+                    if (typing) return;
+
+                    event.preventDefault();
+
+                    if (times.length > 0) {
+                        times[times.length - 1].penalty = "DNF";
+                        updateUI();
+                    }
+                    return;
+            }
+        }
+
+        if (typing || (target instanceof HTMLElement && target.closest("button"))) {
+            return;
+        }
+
+        if (event.key === "Escape") {
+            stopInspection();
+            closeGraph();
+
+            if (!timerRunning) {
+                displayMode = "scramble";
+                scrambleEl.textContent = currentScramble;
+            }
+
+            return;
+        }
+
+        if (event.code === "Space") {
+            event.preventDefault();
+
+            if (timerRunning) {
+                stopTimer();
+            } else if (!inspectionActive) {
+                startTimer();
+            }
+
+            return;
+        }
+
+        if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+        switch (event.key.toLowerCase()) {
+            case "i":
+                startInspection();
+                break;
+
+            case "n":
+                if (!timerRunning && !inspectionActive) {
+                    generateScramble();
+                }
+                break;
+
+            case "p":
+                selectPuzzle();
+                break;
+
+            case "s":
+                manageSessions();
+                break;
+
+            case "g":
+                showGraph();
+                break;
+
+            case "e":
+                exportCSV();
+                break;
+
+            case "t":
+                cycleTheme();
+                break;
+
+            case "h":
+                showHelp();
+                break;
+        }
+    });
+
+    document.getElementById("newScramble")
+        ?.addEventListener("click", () => {
             if (!timerRunning && !inspectionActive) generateScramble();
         });
 
-        document.getElementById("inspectionButton")?.addEventListener("click", startInspection);
-        document.getElementById("puzzleButton")?.addEventListener("click", selectPuzzle);
-        document.getElementById("sessionButton")?.addEventListener("click", manageSessions);
-        document.getElementById("graphButton")?.addEventListener("click", showGraph);
-        document.getElementById("exportButton")?.addEventListener("click", exportCSV);
-        document.getElementById("themeButton")?.addEventListener("click", cycleTheme);
-        document.getElementById("helpButton")?.addEventListener("click", showHelp);
+    document.getElementById("inspectionButton")
+        ?.addEventListener("click", startInspection);
 
-        applyTheme();
-        generateScramble();
-        updateUI();
-    })();
+    document.getElementById("puzzleButton")
+        ?.addEventListener("click", selectPuzzle);
+
+    document.getElementById("sessionButton")
+        ?.addEventListener("click", manageSessions);
+
+    document.getElementById("graphButton")
+        ?.addEventListener("click", showGraph);
+
+    document.getElementById("exportButton")
+        ?.addEventListener("click", exportCSV);
+
+    document.getElementById("helpButton")
+        ?.addEventListener("click", showHelp);
+
+    window.addEventListener("beforeunload", () => {
+        if (uploadedBackgroundUrl) {
+            URL.revokeObjectURL(uploadedBackgroundUrl);
+        }
+    });
+
+    applyTheme();
+    generateScramble();
+    updateUI();
+})();
     </script>
 </body>
 </html>
