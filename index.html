@@ -313,11 +313,102 @@
 .hidden {
     display: none !important;
 }
+/* Slide-out navigation */
+        .sidebar {
+            box-sizing: border-box;
+            height: 100dvh;
+            width: 0;
+            position: fixed;
+            z-index: 1002;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding-top: 60px;
+            transition: width 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 4px 0 16px #0003;
+        }
+
+        .sidebar a {
+            box-sizing: border-box;
+            padding: 12px 24px;
+            text-decoration: none;
+            font-size: 20px;
+            color: #bdbdbd;
+            display: block;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a:focus-visible {
+            color: #fff;
+            background: #292929;
+            outline-color: var(--cubingd-accent);
+        }
+
+        .sidebar .closebtn {
+            position: absolute;
+            top: 6px;
+            right: 12px;
+            padding: 4px 12px;
+            font-size: 36px;
+            line-height: 1.2;
+        }
+
+        #main {
+            position: fixed;
+            z-index: 1001;
+            top: 12px;
+            right: 12px;
+            padding: 0;
+            transition: right 0.3s ease;
+        }
+
+        .openbtn {
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #111;
+            color: white;
+            padding: 10px 14px;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+
+        .openbtn:hover,
+        .openbtn:focus-visible {
+            background-color: #333;
+            border-color: var(--cubingd-accent);
+        }
+
+        @media screen and (max-height: 450px) {
+            .sidebar { padding-top: 48px; }
+            .sidebar a { font-size: 18px; padding-top: 8px; padding-bottom: 8px; }
+        }
+
+        @media (max-width: 600px) {
+            #main { top: 8px; right: 8px; }
+            .openbtn { font-size: 14px; padding: 8px 10px; }
+        }
     </style>
 </head>
 <body>
+    <nav id="mySidebar" class="sidebar" aria-label="Main navigation" aria-hidden="true">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()" aria-label="Close sidebar">&times;</a>
+        <a href="www.cubingd.com/coaching">Coaching</a>
+            <a href="www.cubingd.com/courses">
+                Courses
+                Coming soon
+            </a>
+    </nav>
+
+    <div id="main">
+        <button class="openbtn" type="button" onclick="openNav()" aria-controls="mySidebar" aria-expanded="false">&#9776; Menu</button>
+    </div>
+
     <div class="container">
-        <div class="left">
+        <div class="left" id="times">
             <h1>CubingD</h1>
             <p class="times">Times</p>
         </div>
@@ -327,7 +418,7 @@
 <p id="best-ao12">Best Ao12: --</p>
             </div>
 
-        <div class="centre">
+        <div class="centre" id="scramble">
             <h1>Scramble</h1>
         </div>
 
@@ -340,7 +431,7 @@
         <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="12.34" aria-label="Time in hundredths of a second, digits only. For example, 1234 is 12.34 seconds.">
     </div>
 
-    <div class="averages">
+    <div class="averages" id="averages">
         <h1>Ao5: --</h1>
         <h1>Ao12: --</h1>
     </div>
@@ -429,6 +520,35 @@
 
 
 <script>
+
+function openNav() {
+    const sidebar = document.getElementById("mySidebar");
+    const menuButton = document.querySelector(".openbtn");
+    if (!sidebar) return;
+
+    sidebar.style.width = `min(280px, 85vw)`;
+    sidebar.setAttribute("aria-hidden", "false");
+    if (menuButton) menuButton.setAttribute("aria-expanded", "true");
+    document.addEventListener("keydown", handleSidebarEscape);
+}
+
+function closeNav() {
+    const sidebar = document.getElementById("mySidebar");
+    const menuButton = document.querySelector(".openbtn");
+    if (!sidebar) return;
+
+    sidebar.style.width = "0";
+    sidebar.setAttribute("aria-hidden", "true");
+    if (menuButton) {
+        menuButton.setAttribute("aria-expanded", "false");
+        menuButton.focus({ preventScroll: true });
+    }
+    document.removeEventListener("keydown", handleSidebarEscape);
+}
+
+function handleSidebarEscape(event) {
+    if (event.key === "Escape") closeNav();
+}
 
 (() => {
   "use strict";
