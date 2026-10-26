@@ -31,7 +31,7 @@
     left: 0;
     width: calc((100% - 30px) / 4);
     text-align: left;
-    max-height: calc(100dvh - 40px);
+    max-height: calc(100dvh - 150px);
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -39,7 +39,6 @@
 
     scrollbar-width: none;
     -ms-overflow-style: none;
-    max-height: calc(100dvh - 40px);
 }
 
 .left::-webkit-scrollbar {
@@ -160,7 +159,7 @@
     left: 0;
     width: calc((100% - 30px) / 4);
     text-align: left;
-    max-height: calc(100dvh - 40px);
+    max-height: calc(100dvh - 150px);
 
     overflow-y: auto;
     overflow-x: hidden;
@@ -208,7 +207,6 @@
             width: 100px;
             text-align: left;
             font: inherit;
-            height : 25px;
         }
         .solve-row:hover, .solve-row:focus-visible {
             border-color: var(--cubingd-accent);
@@ -316,7 +314,6 @@
     display: none !important;
 }
 
-
         .sidebar {
             box-sizing: border-box;
             height: 100dvh;
@@ -394,118 +391,115 @@
             #main { top: 8px; right: 8px; }
             .openbtn { font-size: 14px; padding: 8px 10px; }
         }
-        
-.timer-session-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-  margin: 35px auto 10px;
-  width: fit-content;
-  max-width: 100%;
-  font-family: Arial, sans-serif;
-}
 
-.timer-session-wrap label {
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0.7;
-}
+        .timer-session-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 28px auto 0;
+            padding: 0 12px;
+            color: inherit;
+        }
+        .timer-session-wrap label { font-weight: 700; font-size: 15px; }
+        #timerSessionSelect {
+            min-width: 150px;
+            max-width: 260px;
+            padding: 10px 12px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            color: inherit;
+            background: var(--cubingd-background, lightgrey);
+            font: inherit;
+        }
+        .timer-session-buttons { display: flex; align-items: center; gap: 6px; }
+        .timer-inline-icon-button, .timer-session-menu-btn {
+            min-width: 39px;
+            min-height: 39px;
+            padding: 8px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            background: transparent;
+            color: inherit;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .timer-inline-icon-button:hover, .timer-session-menu-btn:hover {
+            border-color: var(--cubingd-accent);
+        }
+        .timer-session-more { position: relative; display: none; }
+        .timer-session-menu-expand {
+            position: absolute;
+            z-index: 1200;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 195px;
+            padding: 7px;
+            border: 1px solid #888;
+            border-radius: 12px;
+            background: var(--cubingd-background, #ddd);
+            box-shadow: 0 8px 24px #0004;
+        }
+        .timer-session-menu-expand[hidden] { display: none; }
+        .timer-session-menu-expand button {
+            display: block;
+            width: 100%;
+            margin: 0;
+            text-align: left;
+            color: inherit;
+            background: transparent;
+            border: 0;
+            padding: 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+        .timer-session-menu-expand button:hover { background: #8883; }
+        @media (max-width: 650px) {
+            .timer-session-btn-desktop { display: none; }
+            .timer-session-more { display: block; }
+            #timerSessionSelect { min-width: 130px; max-width: 55vw; }
+        }
 
-.timer-session-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  flex-wrap: wrap;
-}
-
-#timerSessionSelect {
-  min-width: 175px;
-  max-width: 260px;
-  padding: 11px 14px;
-  font-size: 14px;
-  border: 1px solid #8887;
-  border-radius: 11px;
-  background: var(--cubingd-background, lightgrey);
-  color: var(--cubingd-color, #111);
-  cursor: pointer;
-  outline: none;
-}
-
-#timerSessionSelect:focus {
-  border-color: var(--cubingd-accent);
-}
-
-.timer-session-controls button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  border: 1px solid #8887;
-  border-radius: 11px;
-  background: var(--cubingd-background, lightgrey);
-  color: var(--cubingd-color, #111);
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.timer-session-controls button:hover {
-  border-color: var(--cubingd-accent);
-  transform: translateY(-2px);
-}
-
-.timer-session-controls button:active {
-  transform: scale(0.95);
-}
-
-#timerAddSessionBtn:hover {
-  color: var(--cubingd-accent);
-}
-
-#timerDeleteSessionBtn:hover {
-  color: #ff6262;
-}
-
-@media (max-width: 600px) {
-  .timer-session-wrap {
-    width: 100%;
-    margin-top: 20px;
-  }
-
-  #timerSessionSelect {
-    min-width: 130px;
-    max-width: 180px;
-  }
-
-  .timer-session-controls button {
-    width: 36px;
-    height: 36px;
-  }
-}
-
+        #sessionDialog {
+            background: var(--cubingd-background, lightgrey);
+            color: var(--cubingd-color, #111);
+            border: 1px solid #888;
+            border-radius: 18px;
+            width: min(380px, calc(100vw - 60px));
+            box-sizing: border-box;
+            padding: 24px;
+            box-shadow: 0 15px 60px #0006;
+        }
+        #sessionDialog::backdrop { background: #0009; }
+        #sessionDialog h2 { margin: 0 0 15px; }
+        #sessionNameInput {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #888;
+            border-radius: 9px;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+        }
+        #sessionNameInput[hidden] { display: none; }
+        #sessionDialogMessage { min-height: 20px; line-height: 1.5; }
+        .session-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 20px; }
+        #sessionConfirmBtn { background: var(--cubingd-accent); color: #111; font-weight: bold; }
+        #sessionConfirmBtn.danger { background: #e75d64; color: #fff; }
+        #sessionClearBtn { margin-top: 10px; width: 100%; }
+        #sessionClearBtn[hidden] { display: none; }
     </style>
-</head>
-<body>
-    
 </head>
 <body>
     <nav id="mySidebar" class="sidebar" aria-label="Main navigation" aria-hidden="true">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()" aria-label="Close sidebar">&times;</a>
-
         <a href="https://www.cubingd.com/coaching" target="_top">Coaching</a>
-
-        <a href="https://www.cubingd.com/coaching" target="_top">Courses</a>
-            Courses
-            <span>Coming soon</span>
-        </a>
+        <a href="https://www.cubingd.com/courses" target="_top">Courses</a>
     </nav>
-</body>
-</html>
-
 
     <div id="main">
         <button class="openbtn" type="button" onclick="openNav()" aria-controls="mySidebar" aria-expanded="false">&#9776; Menu</button>
@@ -531,24 +525,23 @@
         </div>
     </div>
 
-<div class="timer-session-wrap">
-  <label for="timerSessionSelect">Session</label>
-
-  <div class="timer-session-controls">
-    <select id="timerSessionSelect" aria-label="Select session">
-    </select>
-
-    <button type="button" id="timerAddSessionBtn"
-      title="Create session" aria-label="Create session">+</button>
-
-    <button type="button" id="timerEditSessionBtn"
-      title="Rename session" aria-label="Rename session">✎</button>
-
-    <button type="button" id="timerDeleteSessionBtn"
-      title="Delete session or times"
-      aria-label="Delete session or times">🗑</button>
-  </div>
-</div>
+    <section class="timer-select-wrap timer-session-wrap" aria-label="Sessions">
+        <label for="timerSessionSelect">Session</label>
+        <select id="timerSessionSelect" class="form-select form-select-sm" aria-label="Select session"></select>
+        <div class="timer-session-buttons">
+            <button id="timerAddSessionBtn" class="timer-inline-icon-button timer-session-btn-desktop" type="button" aria-label="Create session" title="Create session">+</button>
+            <button id="timerEditSessionBtn" class="timer-inline-icon-button timer-session-btn-desktop" type="button" aria-label="Rename session" title="Rename session">✎</button>
+            <button id="timerDeleteSessionBtn" class="timer-inline-icon-button timer-session-btn-desktop" type="button" aria-label="Delete session or its times" title="Delete session or its times">🗑</button>
+            <div class="timer-session-more">
+                <button id="timerSessionMenuBtn" class="timer-session-menu-btn" type="button" aria-label="Session actions" aria-haspopup="true" aria-controls="timerSessionMenuExpand" aria-expanded="false">⋮</button>
+                <div id="timerSessionMenuExpand" class="timer-session-menu-expand" hidden>
+                    <button type="button" data-session-action="add">+ Create session</button>
+                    <button type="button" data-session-action="edit">✎ Rename session</button>
+                    <button type="button" data-session-action="delete">🗑 Delete / clear times</button>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <div class="input">
         <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="12.34" aria-label="Time in hundredths of a second, digits only. For example, 1234 is 12.34 seconds.">
@@ -601,8 +594,7 @@
         </label>
         <input type="file" id="imageInput" accept="image/*" hidden>
     </div>
-</body>
-<h3>Custom Background Colour</h3>
+    <h3>Custom Background Colour</h3>
 <input type="color" id="customColor" value="#d3d3d3">
     <div class="settings-row">
         <button type="button" id="reset-btn">Reset Background</button>
@@ -641,6 +633,17 @@
     </div>
 </dialog>
 
+
+<dialog id="sessionDialog" aria-labelledby="sessionDialogTitle">
+    <h2 id="sessionDialogTitle">Session</h2>
+    <input id="sessionNameInput" type="text" maxlength="60" autocomplete="off" placeholder="Session name">
+    <p id="sessionDialogMessage" role="status"></p>
+    <button id="sessionClearBtn" type="button" hidden>Clear times instead</button>
+    <div class="session-dialog-actions">
+        <button id="sessionCancelBtn" type="button">Cancel</button>
+        <button id="sessionConfirmBtn" type="button">Save</button>
+    </div>
+</dialog>
 
 <script>
 
@@ -939,8 +942,6 @@ function handleSidebarEscape(event) {
       }
 
       timesContainer.appendChild(button);
-      refreshSessionSelect();
-saveData();
     });
 
     timesContainer.scrollTop = scrollToLatest ? 0 : previousScroll;
@@ -959,6 +960,7 @@ saveData();
     document.getElementById("best-ao12").textContent =
       `Best Ao12: ${calculateBestAverage(times, 12)}`;
 
+    refreshSessionSelect();
     saveData();
   }
   function renderSolveDetails() {
@@ -1305,177 +1307,139 @@ saveData();
     updateUI();
   }
 
-const sessionSelect = document.getElementById("timerSessionSelect");
-const addSessionBtn = document.getElementById("timerAddSessionBtn");
-const editSessionBtn = document.getElementById("timerEditSessionBtn");
-const deleteSessionBtn = document.getElementById("timerDeleteSessionBtn");
+  const sessionSelect = document.getElementById("timerSessionSelect");
+  const sessionMenuButton = document.getElementById("timerSessionMenuBtn");
+  const sessionMenu = document.getElementById("timerSessionMenuExpand");
 
-function refreshSessionSelect() {
-  sessionSelect.replaceChildren();
+  function refreshSessionSelect() {
+    sessionSelect.replaceChildren();
+    for (const name of Object.keys(data.sessions)) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      sessionSelect.appendChild(option);
+    }
+    sessionSelect.value = currentSession;
+  }
 
-  Object.keys(data.sessions).forEach(name => {
-    const option = document.createElement("option");
-    option.value = name;
-    option.textContent = name;
-    sessionSelect.appendChild(option);
+  const sessionDialog = document.getElementById("sessionDialog");
+  const sessionDialogTitle = document.getElementById("sessionDialogTitle");
+  const sessionNameInput = document.getElementById("sessionNameInput");
+  const sessionDialogMessage = document.getElementById("sessionDialogMessage");
+  const sessionConfirmBtn = document.getElementById("sessionConfirmBtn");
+  const sessionCancelBtn = document.getElementById("sessionCancelBtn");
+  const sessionClearBtn = document.getElementById("sessionClearBtn");
+  let sessionAction = "";
+
+  function openSessionDialog(action) {
+    if (timerRunning || inspectionActive) return;
+    sessionAction = action;
+    sessionNameInput.hidden = action === "delete" || action === "clear";
+    sessionNameInput.value = action === "add" ? "" : currentSession;
+    sessionClearBtn.hidden = action !== "delete";
+    sessionConfirmBtn.classList.toggle("danger", action === "delete" || action === "clear");
+    sessionDialogTitle.textContent = {
+      add: "Create session",
+      edit: "Rename session",
+      delete: "Delete session",
+      clear: "Clear session times"
+    }[action];
+    sessionDialogMessage.textContent = {
+      add: "Create a new session without changing your existing times.",
+      edit: "Change this session's name. Your times will be kept.",
+      delete: `Delete “${currentSession}” and every solve in it? This cannot be undone.`,
+      clear: `Clear all ${times.length} solves in “${currentSession}”? This cannot be undone.`
+    }[action];
+    sessionConfirmBtn.textContent = action === "add" ? "Create" : action === "edit" ? "Rename" : "Delete";
+    sessionDialog.showModal();
+    if (!sessionNameInput.hidden) sessionNameInput.focus();
+  }
+
+  function createSession() { openSessionDialog("add"); }
+  function renameSession() { openSessionDialog("edit"); }
+  function deleteSessionOrTimes() { openSessionDialog("delete"); }
+
+  sessionCancelBtn.addEventListener("click", () => sessionDialog.close());
+  sessionClearBtn.addEventListener("click", () => {
+    sessionDialog.close();
+    openSessionDialog("clear");
+  });
+  sessionNameInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      sessionConfirmBtn.click();
+    }
   });
 
-  sessionSelect.value = currentSession;
-}
-
-function sessionBusy() {
-  if (timerRunning || inspectionActive) {
-    alert("Finish the current solve or inspection first.");
-    return true;
-  }
-
-  return false;
-}
-
-sessionSelect.addEventListener("change", () => {
-  if (sessionBusy()) {
-    sessionSelect.value = currentSession;
-    return;
-  }
-
-  switchSession(sessionSelect.value);
-});
-
-addSessionBtn.addEventListener("click", () => {
-  if (sessionBusy()) return;
-
-  const name = prompt("New session name:");
-
-  if (name === null) return;
-
-  const cleanName = name.trim();
-
-  if (!cleanName || Object.hasOwn(data.sessions, cleanName)) {
-    alert("Invalid name or session already exists.");
-    return;
-  }
-
-  data.sessions[cleanName] = {
-    times: [],
-    puzzle: currentPuzzle
-  };
-
-  switchSession(cleanName);
-  refreshSessionSelect();
-});
-
-editSessionBtn.addEventListener("click", () => {
-  if (sessionBusy()) return;
-
-  const newName = prompt("Rename session:", currentSession);
-
-  if (newName === null) return;
-
-  const cleanName = newName.trim();
-
-  if (!cleanName) {
-    alert("Session name cannot be empty.");
-    return;
-  }
-
-  if (cleanName === currentSession) return;
-
-  if (Object.hasOwn(data.sessions, cleanName)) {
-    alert("A session with that name already exists.");
-    return;
-  }
-
-  data.sessions[cleanName] = data.sessions[currentSession];
-  delete data.sessions[currentSession];
-
-  currentSession = cleanName;
-
-  updateUI();
-  refreshSessionSelect();
-});
-
-deleteSessionBtn.addEventListener("click", () => {
-  if (sessionBusy()) return;
-
-  const action = prompt(
-    `Manage "${currentSession}"\n\n` +
-    "1 = Clear all times\n" +
-    "2 = Delete session\n\n" +
-    "Enter 1 or 2:"
-  );
-
-  if (action === "1") {
-    if (!confirm("Delete ALL times in this session?")) return;
-
-    times.length = 0;
-    updateUI();
-    return;
-  }
-
-  if (action === "2") {
-    if (Object.keys(data.sessions).length <= 1) {
-      alert("You must keep at least one session.");
-      return;
-    }
-
-    if (!confirm(`Delete "${currentSession}" and all its times?`)) {
-      return;
-    }
-
-    delete data.sessions[currentSession];
-
-    const nextSession = Object.keys(data.sessions)[0];
-
-    switchSession(nextSession);
-    refreshSessionSelect();
-  }
-});
-
-refreshSessionSelect();
-
-  function manageSessions() {
-    const action = prompt(
-      "Sessions:\n" +
-      Object.keys(data.sessions).join("\n") +
-      "\n\nType a session name to switch, NEW to create one, or DELETE to remove the current session."
-    );
-
-    if (!action) return;
-
-    if (action.trim().toUpperCase() === "NEW") {
-      const name = prompt("Enter a name for your new session:");
-
-      if (!name || !name.trim() || data.sessions[name.trim()]) {
-        alert("That session name is invalid or already exists.");
+  sessionConfirmBtn.addEventListener("click", () => {
+    const name = sessionNameInput.value.trim();
+    if (sessionAction === "add" || sessionAction === "edit") {
+      if (!name || (name !== currentSession || sessionAction === "add") && Object.hasOwn(data.sessions, name)) {
+        sessionDialogMessage.textContent = "Choose a unique, non-empty session name.";
         return;
       }
-
-      data.sessions[name.trim()] = {
-        times: [],
-        puzzle: currentPuzzle
-      };
-
-      switchSession(name.trim());
-      return;
     }
-
-    if (action.trim().toUpperCase() === "DELETE") {
+    if (sessionAction === "add") {
+      data.sessions[name] = { times: [], puzzle: currentPuzzle };
+      switchSession(name);
+    } else if (sessionAction === "edit") {
+      if (name !== currentSession) {
+        const updatedSessions = {};
+        for (const [key, value] of Object.entries(data.sessions)) {
+          updatedSessions[key === currentSession ? name : key] = value;
+        }
+        data.sessions = updatedSessions;
+        currentSession = name;
+        updateUI(false);
+      }
+    } else if (sessionAction === "clear") {
+      times.length = 0;
+      updateUI();
+    } else if (sessionAction === "delete") {
       if (Object.keys(data.sessions).length <= 1) {
-        alert("You must keep at least one session.");
+        sessionDialogMessage.textContent = "You must keep at least one session. Use Clear times instead.";
         return;
       }
-
-      if (!confirm(`Delete session "${currentSession}" and all its solves?`)) {
-        return;
-      }
-
       delete data.sessions[currentSession];
       switchSession(Object.keys(data.sessions)[0]);
-      return;
     }
+    refreshSessionSelect();
+    saveData();
+    sessionDialog.close();
+  });
 
-    switchSession(action.trim());
+  function manageSessions() {
+    sessionSelect.focus();
   }
+
+  sessionSelect.addEventListener("change", () => {
+    if (!timerRunning && !inspectionActive) switchSession(sessionSelect.value);
+    else sessionSelect.value = currentSession;
+  });
+  document.getElementById("timerAddSessionBtn").addEventListener("click", createSession);
+  document.getElementById("timerEditSessionBtn").addEventListener("click", renameSession);
+  document.getElementById("timerDeleteSessionBtn").addEventListener("click", deleteSessionOrTimes);
+
+  function closeSessionMenu() {
+    sessionMenu.hidden = true;
+    sessionMenuButton.setAttribute("aria-expanded", "false");
+  }
+  sessionMenuButton.addEventListener("click", () => {
+    sessionMenu.hidden = !sessionMenu.hidden;
+    sessionMenuButton.setAttribute("aria-expanded", String(!sessionMenu.hidden));
+  });
+  sessionMenu.addEventListener("click", event => {
+    const button = event.target.closest("[data-session-action]");
+    if (!button) return;
+    const action = button.dataset.sessionAction;
+    closeSessionMenu();
+    if (action === "add") createSession();
+    if (action === "edit") renameSession();
+    if (action === "delete") deleteSessionOrTimes();
+  });
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".timer-session-more")) closeSessionMenu();
+  });
 
 
   function selectPuzzle() {
@@ -1800,7 +1764,7 @@ refreshSessionSelect();
 
 
   document.addEventListener("keydown", event => {
-    if (solveDialog.open || settingsPopup.open || shortcutsPopup.open) {
+    if (solveDialog.open || settingsPopup.open || shortcutsPopup.open || sessionDialog.open) {
       return;
     }
 
@@ -1962,7 +1926,7 @@ refreshSessionSelect();
   } catch (error) {
     console.warn("Could not restore background image:", error);
   }
-// Custom colour picker (persisted in this browser)
+
   const customColor = document.getElementById("customColor");
   const COLOR_KEY = "cubingd_custom_color";
 
@@ -1974,7 +1938,6 @@ refreshSessionSelect();
     localStorage.removeItem(BACKGROUND_KEY);
   });
 
-  // Image takes precedence when saved; otherwise restore the selected colour.
   const storedImage = localStorage.getItem(BACKGROUND_KEY);
   const storedColour = localStorage.getItem(COLOR_KEY);
   if (!storedImage && storedColour && /^#[0-9a-f]{6}$/i.test(storedColour)) {
