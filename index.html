@@ -323,12 +323,47 @@
             top: 0;
             left: 0;
             background-color: #111;
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden;
             padding-top: 60px;
             transition: width 0.3s ease;
             white-space: nowrap;
             box-shadow: 4px 0 16px #0003;
+        }
+
+        .sidebar-frame {
+            display: none;
+            width: 100%;
+            height: calc(100dvh - 60px);
+            border: 0;
+            background: #fff;
+        }
+
+        .sidebar.show-frame {
+            overflow-y: hidden;
+        }
+
+        .sidebar.show-frame .sidebar-frame {
+            display: block;
+        }
+
+        .sidebar.show-frame .sidebar-link {
+            display: none;
+        }
+
+        .sidebar .backbtn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            padding: 8px 12px;
+            font-size: 16px;
+            color: #fff;
+            background: #292929;
+            border-radius: 6px;
+        }
+
+        .sidebar.show-frame .backbtn {
+            display: block;
         }
 
         .sidebar a {
@@ -497,8 +532,10 @@
 <body>
     <nav id="mySidebar" class="sidebar" aria-label="Main navigation" aria-hidden="true">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()" aria-label="Close sidebar">&times;</a>
-        <a href="https://www.cubingd.com/coaching" target="_top">Coaching</a>
-        <a href="https://www.cubingd.com/courses" target="_top">Courses</a>
+        <a href="javascript:void(0)" class="backbtn" onclick="showSidebarLinks()">← Back</a>
+        <a href="https://www.cubingd.com/coaching" class="sidebar-link" onclick="openSidebarFrame(event, this.href)">Coaching</a>
+        <a href="https://www.cubingd.com/courses" class="sidebar-link" onclick="openSidebarFrame(event, this.href)">Courses</a>
+        <iframe id="sidebarFrame" class="sidebar-frame" title="Sidebar content" src="about:blank"></iframe>
     </nav>
 
     <div id="main">
@@ -652,10 +689,29 @@ function openNav() {
     const menuButton = document.querySelector(".openbtn");
     if (!sidebar) return;
 
-    sidebar.style.width = `min(280px, 85vw)`;
+    sidebar.style.width = `min(900px, 90vw)`;
     sidebar.setAttribute("aria-hidden", "false");
     if (menuButton) menuButton.setAttribute("aria-expanded", "true");
     document.addEventListener("keydown", handleSidebarEscape);
+}
+
+function openSidebarFrame(event, url) {
+    event.preventDefault();
+    const sidebar = document.getElementById("mySidebar");
+    const frame = document.getElementById("sidebarFrame");
+    if (!sidebar || !frame) return;
+    frame.src = url;
+    sidebar.classList.add("show-frame");
+    sidebar.style.width = `min(1100px, 95vw)`;
+}
+
+function showSidebarLinks() {
+    const sidebar = document.getElementById("mySidebar");
+    const frame = document.getElementById("sidebarFrame");
+    if (!sidebar || !frame) return;
+    sidebar.classList.remove("show-frame");
+    frame.src = "about:blank";
+    sidebar.style.width = `min(900px, 90vw)`;
 }
 
 function closeNav() {
@@ -663,6 +719,9 @@ function closeNav() {
     const menuButton = document.querySelector(".openbtn");
     if (!sidebar) return;
 
+    sidebar.classList.remove("show-frame");
+    const frame = document.getElementById("sidebarFrame");
+    if (frame) frame.src = "about:blank";
     sidebar.style.width = "0";
     sidebar.setAttribute("aria-hidden", "true");
     if (menuButton) {
