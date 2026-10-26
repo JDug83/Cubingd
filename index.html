@@ -391,6 +391,99 @@
             #main { top: 8px; right: 8px; }
             .openbtn { font-size: 14px; padding: 8px 10px; }
         }
+        
+.timer-session-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin: 35px auto 10px;
+  width: fit-content;
+  max-width: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.timer-session-wrap label {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.timer-session-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+#timerSessionSelect {
+  min-width: 175px;
+  max-width: 260px;
+  padding: 11px 14px;
+  font-size: 14px;
+  border: 1px solid #8887;
+  border-radius: 11px;
+  background: var(--cubingd-background, lightgrey);
+  color: var(--cubingd-color, #111);
+  cursor: pointer;
+  outline: none;
+}
+
+#timerSessionSelect:focus {
+  border-color: var(--cubingd-accent);
+}
+
+.timer-session-controls button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: 1px solid #8887;
+  border-radius: 11px;
+  background: var(--cubingd-background, lightgrey);
+  color: var(--cubingd-color, #111);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.timer-session-controls button:hover {
+  border-color: var(--cubingd-accent);
+  transform: translateY(-2px);
+}
+
+.timer-session-controls button:active {
+  transform: scale(0.95);
+}
+
+#timerAddSessionBtn:hover {
+  color: var(--cubingd-accent);
+}
+
+#timerDeleteSessionBtn:hover {
+  color: #ff6262;
+}
+
+@media (max-width: 600px) {
+  .timer-session-wrap {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  #timerSessionSelect {
+    min-width: 130px;
+    max-width: 180px;
+  }
+
+  .timer-session-controls button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
     </style>
 </head>
 <body>
@@ -434,6 +527,25 @@
             <p>v1.0.0</p>
         </div>
     </div>
+
+<div class="timer-session-wrap">
+  <label for="timerSessionSelect">Session</label>
+
+  <div class="timer-session-controls">
+    <select id="timerSessionSelect" aria-label="Select session">
+    </select>
+
+    <button type="button" id="timerAddSessionBtn"
+      title="Create session" aria-label="Create session">+</button>
+
+    <button type="button" id="timerEditSessionBtn"
+      title="Rename session" aria-label="Rename session">✎</button>
+
+    <button type="button" id="timerDeleteSessionBtn"
+      title="Delete session or times"
+      aria-label="Delete session or times">🗑</button>
+  </div>
+</div>
 
     <div class="input">
         <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="12.34" aria-label="Time in hundredths of a second, digits only. For example, 1234 is 12.34 seconds.">
@@ -824,6 +936,8 @@ function handleSidebarEscape(event) {
       }
 
       timesContainer.appendChild(button);
+      refreshSessionSelect();
+saveData();
     });
 
     timesContainer.scrollTop = scrollToLatest ? 0 : previousScroll;
@@ -1187,6 +1301,134 @@ function handleSidebarEscape(event) {
     generateScramble();
     updateUI();
   }
+
+const sessionSelect = document.getElementById("timerSessionSelect");
+const addSessionBtn = document.getElementById("timerAddSessionBtn");
+const editSessionBtn = document.getElementById("timerEditSessionBtn");
+const deleteSessionBtn = document.getElementById("timerDeleteSessionBtn");
+
+function refreshSessionSelect() {
+  sessionSelect.replaceChildren();
+
+  Object.keys(data.sessions).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    sessionSelect.appendChild(option);
+  });
+
+  sessionSelect.value = currentSession;
+}
+
+function sessionBusy() {
+  if (timerRunning || inspectionActive) {
+    alert("Finish the current solve or inspection first.");
+    return true;
+  }
+
+  return false;
+}
+
+sessionSelect.addEventListener("change", () => {
+  if (sessionBusy()) {
+    sessionSelect.value = currentSession;
+    return;
+  }
+
+  switchSession(sessionSelect.value);
+});
+
+addSessionBtn.addEventListener("click", () => {
+  if (sessionBusy()) return;
+
+  const name = prompt("New session name:");
+
+  if (name === null) return;
+
+  const cleanName = name.trim();
+
+  if (!cleanName || Object.hasOwn(data.sessions, cleanName)) {
+    alert("Invalid name or session already exists.");
+    return;
+  }
+
+  data.sessions[cleanName] = {
+    times: [],
+    puzzle: currentPuzzle
+  };
+
+  switchSession(cleanName);
+  refreshSessionSelect();
+});
+
+editSessionBtn.addEventListener("click", () => {
+  if (sessionBusy()) return;
+
+  const newName = prompt("Rename session:", currentSession);
+
+  if (newName === null) return;
+
+  const cleanName = newName.trim();
+
+  if (!cleanName) {
+    alert("Session name cannot be empty.");
+    return;
+  }
+
+  if (cleanName === currentSession) return;
+
+  if (Object.hasOwn(data.sessions, cleanName)) {
+    alert("A session with that name already exists.");
+    return;
+  }
+
+  data.sessions[cleanName] = data.sessions[currentSession];
+  delete data.sessions[currentSession];
+
+  currentSession = cleanName;
+
+  updateUI();
+  refreshSessionSelect();
+});
+
+deleteSessionBtn.addEventListener("click", () => {
+  if (sessionBusy()) return;
+
+  const action = prompt(
+    `Manage "${currentSession}"\n\n` +
+    "1 = Clear all times\n" +
+    "2 = Delete session\n\n" +
+    "Enter 1 or 2:"
+  );
+
+  if (action === "1") {
+    if (!confirm("Delete ALL times in this session?")) return;
+
+    times.length = 0;
+    updateUI();
+    return;
+  }
+
+  if (action === "2") {
+    if (Object.keys(data.sessions).length <= 1) {
+      alert("You must keep at least one session.");
+      return;
+    }
+
+    if (!confirm(`Delete "${currentSession}" and all its times?`)) {
+      return;
+    }
+
+    delete data.sessions[currentSession];
+
+    const nextSession = Object.keys(data.sessions)[0];
+
+    switchSession(nextSession);
+    refreshSessionSelect();
+  }
+});
+
+refreshSessionSelect();
 
   function manageSessions() {
     const action = prompt(
